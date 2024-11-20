@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { PrismaClient } from "@prisma/client";
 import { compareSync, genSaltSync, hashSync } from "bcrypt-ts";
+import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
@@ -16,29 +17,41 @@ const secret_key = "d438upwfj4938wf48djfo8r9";
 const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
 // Register account
 export const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res
+            .status(400)
+            .json({ isSuccess: false, message: errors.array()[0].msg });
+    }
+    const { password, name, email } = req.body;
     try {
-        const data = req.body;
         const salt = genSaltSync(10);
-        const hashedPassword = hashSync(data.password, salt);
+        const hashedPassword = hashSync(password, salt);
         const addUser = yield prisma.user.create({
-            data: { name: data.name, email: data.email, password: hashedPassword },
+            data: { name, email, password: hashedPassword },
         });
         console.log(addUser);
-        res
+        return res
             .status(201)
             .json({ isSuccess: true, message: "Account registered Successfully!" });
     }
     catch (error) {
         console.log(error);
-        res
+        return res
             .status(500)
             .json({ isSuccess: false, message: "Error registering account" });
     }
 });
 // login account
 export const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res
+            .status(409)
+            .json({ isSuccess: false, message: errors.array()[0].msg });
+    }
+    const data = req.body;
     try {
-        const data = req.body;
         const loggingIn = yield prisma.user.findUnique({
             where: { email: data.email },
         });
@@ -50,24 +63,38 @@ export const login = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
         else {
             const isValid = compareSync(data.password, loggingIn === null || loggingIn === void 0 ? void 0 : loggingIn.password);
-            console.log(isValid);
-            if (isValid) {
-                const token = jwt.sign({ id: loggingIn.id, email: loggingIn.email }, secret_key, { expiresIn: "2 days" });
-                console.log(token);
-                res
-                    .status(201)
-                    .json({ isSuccess: true, message: "Login Successful!", token });
-            }
-            else if (!isValid) {
-                console.log(isValid);
+            if (!isValid) {
                 res
                     .status(401)
                     .json({ isSuccess: false, message: "Invalid user credentials" });
             }
+            const token = jwt.sign({ id: loggingIn.id, email: loggingIn.email }, secret_key, { expiresIn: "2 days" });
+            res
+                .status(201)
+                .json({ isSuccess: true, message: "Login Successful!", token });
         }
     }
     catch (error) {
         console.log(error);
         res.status(401).json({ isSuccess: false, message: "Error logging in" });
+    }
+});
+export const checkStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userDoc = yield prisma.user.findUnique({
+            where: { id: req.userId },
+            select: { email: true, name: true },
+        });
+        if (!userDoc) {
+            throw new Error("User is Unauthorized!");
+        }
+        return res.json({
+            isSuccess: true,
+            message: "User is authorized",
+            user: userDoc,
+        });
+    }
+    catch (error) {
+        return res.json({ isSuccess: false, message: error.message });
     }
 });
