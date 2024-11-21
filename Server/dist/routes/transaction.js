@@ -1,6 +1,7 @@
 import express from "express";
 import { isAuth } from "../middlewares/isAuth.js";
-import { addIncome } from "../Controllers/Transaction.js";
+import { addIncome, addExpense } from "../Controllers/Transaction.js";
 const router = express.Router();
-router.post("/addTransaction", isAuth, addIncome);
+router.post("/addIncome", isAuth, addIncome);
+router.post("/addExpense", isAuth, addExpense);
 export default router;

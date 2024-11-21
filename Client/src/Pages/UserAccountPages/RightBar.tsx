@@ -1,6 +1,6 @@
 import React from "react";
-import ExpensesForm from "./ExpensesForm";
-import WalletForm from "./WalletForm";
+import ExpensesForm from "../../components/AccountHomePage/ExpensesForm";
+import WalletForm from "../../components/AccountHomePage/WalletForm";
 
 const RightBar = () => {
   return (

@@ -5,6 +5,7 @@ import { isAuth } from "../middlewares/isAuth.js";
 import { addIncome, addExpense } from "../Controllers/Transaction.js";
 const router: Router = express.Router();
 
-router.post("/addTransaction", isAuth as any, addIncome);
+router.post("/addIncome", isAuth as any, addIncome);
+router.post("/addExpense", isAuth as any, addExpense);
 
 export default router;

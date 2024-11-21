@@ -90,7 +90,7 @@ export const checkStatus = async (req: Request, res: Response) => {
   try {
     const userDoc = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { email: true, name: true },
+      select: { email: true, name: true, id: true },
     });
     if (!userDoc) {
       throw new Error("User is Unauthorized!");

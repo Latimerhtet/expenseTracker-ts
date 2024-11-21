@@ -11,19 +11,59 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
 export const addIncome = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { incomeName, amount, date } = req.body;
-        res.status(201).json({ isSuccess: true, id: req.userId });
+        const { userId, data } = req.body;
+        const transactionDoc = yield prisma.transaction.create({
+            data: {
+                name: data.incomeName,
+                amount: data.amount,
+                type: "income",
+                userId,
+            },
+        });
+        if (!transactionDoc) {
+            throw new Error("Income cannot be added this time. Try Again!");
+        }
+        res
+            .status(201)
+            .json({
+            isSuccess: true,
+            id: req.userId,
+            message: "Transaction added Successfully!",
+        });
     }
     catch (error) {
-        res.status(200).json({ isSuccess: false });
+        res.status(200).json({
+            isSuccess: false,
+            message: error.message,
+        });
     }
 });
 export const addExpense = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { expenseName, amount, date } = req.body;
-        console.log(expenseName);
+        const { userId, data } = req.body;
+        const transactionDoc = yield prisma.transaction.create({
+            data: {
+                name: data.expenseName,
+                amount: data.amount,
+                type: "expense",
+                userId,
+            },
+        });
+        if (!transactionDoc) {
+            throw new Error("Expense can not be added this time. Try again!");
+        }
+        res
+            .status(201)
+            .json({
+            isSuccess: true,
+            id: req.userId,
+            message: "Transaction added Successfully!",
+        });
     }
     catch (error) {
-        res.status(200).json({ isSuccess: false });
+        res.status(200).json({
+            isSuccess: false,
+            message: error.message,
+        });
     }
 });

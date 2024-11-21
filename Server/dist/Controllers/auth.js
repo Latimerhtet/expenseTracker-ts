@@ -83,7 +83,7 @@ export const checkStatus = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         const userDoc = yield prisma.user.findUnique({
             where: { id: req.userId },
-            select: { email: true, name: true },
+            select: { email: true, name: true, id: true },
         });
         if (!userDoc) {
             throw new Error("User is Unauthorized!");

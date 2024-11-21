@@ -1,6 +1,6 @@
-import * as React from "react";
 import Sidebar from "../components/AccountHomePage/Sidebar";
-import RightBar from "../components/AccountHomePage/RightBar";
+
+import { Outlet } from "react-router-dom";
 
 export default function AccountDashboard() {
   return (
@@ -9,7 +9,7 @@ export default function AccountDashboard() {
         <Sidebar />
       </div>
       <div className="w-full basis-4/5">
-        <RightBar />
+        <Outlet />
       </div>
     </section>
   );
